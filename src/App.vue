@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import type { LoanApplication, LoanStatus } from './types/loan'
+import type { LoanApplication } from './types/loan'
 import { getLoans, updateLoanStatus, autoDecideLoan } from './services/loanService'
 import LoanForm from './components/LoanForm.vue'
 import LoanList from './components/LoanList.vue'
@@ -13,12 +13,12 @@ function refreshLoans() {
 }
 
 function handleApprove(id: string) {
-  updateLoanStatus(id, 'approved' as LoanStatus)
+  updateLoanStatus(id, 'approved')
   refreshLoans()
 }
 
 function handleReject(id: string) {
-  updateLoanStatus(id, 'rejected' as LoanStatus)
+  updateLoanStatus(id, 'rejected')
   refreshLoans()
 }
 
@@ -35,6 +35,7 @@ onMounted(() => {
 <template>
   <div class="app">
     <header class="app-header">
+      <img src="/tredgate-logo.svg" alt="Tredgate Logo" class="logo" />
       <h1>Tredgate Loan</h1>
       <p class="tagline">Simple loan application management</p>
     </header>
@@ -63,8 +64,14 @@ onMounted(() => {
   margin-bottom: 2rem;
 }
 
+.logo {
+  width: 80px;
+  height: auto;
+  margin-bottom: 0.5rem;
+}
+
 .tagline {
-  color: var(--text-secondary);
+  color: var(--tagline-color);
   margin-top: -0.5rem;
 }
 
