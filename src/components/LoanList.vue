@@ -148,14 +148,14 @@ function formatDate(isoDate: string): string {
 
 <style scoped>
 .loan-list {
-  flex: 1;
+  width: 100%;
   min-width: 0;
   overflow-x: auto;
 }
 
 .empty-state {
   text-align: center;
-  padding: 2rem;
+  padding: 3rem 2rem;
   color: var(--text-secondary);
 }
 
