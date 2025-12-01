@@ -1,4 +1,5 @@
 import type { LoanApplication, LoanStatus, CreateLoanInput } from '../types/loan'
+import { createAuditEntry, appendAuditEntry } from './auditService'
 
 const STORAGE_KEY = 'tredgate_loans'
 
@@ -65,6 +66,10 @@ export function createLoanApplication(input: CreateLoanInput): LoanApplication {
   loans.push(newLoan)
   saveLoans(loans)
 
+  // Record audit event for loan creation
+  const auditEntry = createAuditEntry('created', newLoan.id, newLoan.applicantName)
+  appendAuditEntry(auditEntry)
+
   return newLoan
 }
 
@@ -81,7 +86,20 @@ export function updateLoanStatus(id: string, status: LoanStatus): void {
 
   const loan = loans[loanIndex]
   if (loan) {
+    const previousStatus = loan.status
     loan.status = status
+    
+    // Record audit event for manual status update
+    const auditEntry = createAuditEntry(
+      'status_update_manual',
+      loan.id,
+      loan.applicantName,
+      {
+        previousStatus,
+        newStatus: status
+      }
+    )
+    appendAuditEntry(auditEntry)
   }
   saveLoans(loans)
 }
@@ -108,11 +126,25 @@ export function autoDecideLoan(id: string): void {
     throw new Error(`Loan with id ${id} not found`)
   }
 
+  const previousStatus = loan.status
   if (loan.amount <= 100000 && loan.termMonths <= 60) {
     loan.status = 'approved'
   } else {
     loan.status = 'rejected'
   }
+
+  // Record audit event for auto-decision
+  const auditEntry = createAuditEntry(
+    'status_update_auto',
+    loan.id,
+    loan.applicantName,
+    {
+      previousStatus,
+      newStatus: loan.status,
+      metadata: `Auto-decision: amount=${loan.amount}, term=${loan.termMonths}`
+    }
+  )
+  appendAuditEntry(auditEntry)
 
   saveLoans(loans)
 }
@@ -126,6 +158,14 @@ export function deleteLoan(id: string): void {
   
   if (loanIndex === -1) {
     throw new Error(`Loan with id ${id} not found`)
+  }
+
+  const loan = loans[loanIndex]
+  
+  // Record audit event for deletion before removing the loan
+  if (loan) {
+    const auditEntry = createAuditEntry('deleted', loan.id, loan.applicantName)
+    appendAuditEntry(auditEntry)
   }
 
   loans.splice(loanIndex, 1)

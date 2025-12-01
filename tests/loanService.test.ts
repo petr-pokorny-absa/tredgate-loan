@@ -8,6 +8,7 @@ import {
   autoDecideLoan,
   deleteLoan
 } from '../src/services/loanService'
+import { getAuditLogs } from '../src/services/auditService'
 import type { LoanApplication } from '../src/types/loan'
 
 // Mock localStorage
@@ -424,6 +425,110 @@ describe('loanService', () => {
       expect(() => deleteLoan('any-id')).toThrow(
         'Loan with id any-id not found'
       )
+    })
+  })
+
+  describe('Audit logging integration', () => {
+    it('creates audit entry when loan is created', () => {
+      const input = {
+        applicantName: 'Audit Test User',
+        amount: 25000,
+        termMonths: 12,
+        interestRate: 0.05
+      }
+
+      const loan = createLoanApplication(input)
+      const auditLogs = getAuditLogs()
+
+      expect(auditLogs).toHaveLength(1)
+      expect(auditLogs[0]?.eventType).toBe('created')
+      expect(auditLogs[0]?.loanId).toBe(loan.id)
+      expect(auditLogs[0]?.applicantName).toBe('Audit Test User')
+    })
+
+    it('creates audit entry when loan status is updated manually', () => {
+      const loan: LoanApplication = {
+        id: 'test-audit',
+        applicantName: 'Status Update User',
+        amount: 50000,
+        termMonths: 24,
+        interestRate: 0.08,
+        status: 'pending',
+        createdAt: '2024-01-01T00:00:00.000Z'
+      }
+      saveLoans([loan])
+
+      updateLoanStatus('test-audit', 'approved')
+
+      const auditLogs = getAuditLogs()
+      expect(auditLogs).toHaveLength(1)
+      expect(auditLogs[0]?.eventType).toBe('status_update_manual')
+      expect(auditLogs[0]?.loanId).toBe('test-audit')
+      expect(auditLogs[0]?.previousStatus).toBe('pending')
+      expect(auditLogs[0]?.newStatus).toBe('approved')
+    })
+
+    it('creates audit entry when loan is auto-decided', () => {
+      const loan: LoanApplication = {
+        id: 'auto-audit',
+        applicantName: 'Auto Decision User',
+        amount: 50000,
+        termMonths: 24,
+        interestRate: 0.08,
+        status: 'pending',
+        createdAt: '2024-01-01T00:00:00.000Z'
+      }
+      saveLoans([loan])
+
+      autoDecideLoan('auto-audit')
+
+      const auditLogs = getAuditLogs()
+      expect(auditLogs).toHaveLength(1)
+      expect(auditLogs[0]?.eventType).toBe('status_update_auto')
+      expect(auditLogs[0]?.loanId).toBe('auto-audit')
+      expect(auditLogs[0]?.previousStatus).toBe('pending')
+      expect(auditLogs[0]?.newStatus).toBe('approved')
+      expect(auditLogs[0]?.metadata).toContain('Auto-decision')
+    })
+
+    it('creates audit entry when loan is deleted', () => {
+      const loan: LoanApplication = {
+        id: 'delete-audit',
+        applicantName: 'Delete User',
+        amount: 30000,
+        termMonths: 18,
+        interestRate: 0.07,
+        status: 'approved',
+        createdAt: '2024-01-01T00:00:00.000Z'
+      }
+      saveLoans([loan])
+
+      deleteLoan('delete-audit')
+
+      const auditLogs = getAuditLogs()
+      expect(auditLogs).toHaveLength(1)
+      expect(auditLogs[0]?.eventType).toBe('deleted')
+      expect(auditLogs[0]?.loanId).toBe('delete-audit')
+      expect(auditLogs[0]?.applicantName).toBe('Delete User')
+    })
+
+    it('creates multiple audit entries for multiple operations', () => {
+      const input = {
+        applicantName: 'Multi Op User',
+        amount: 40000,
+        termMonths: 20,
+        interestRate: 0.06
+      }
+
+      const loan = createLoanApplication(input)
+      updateLoanStatus(loan.id, 'approved')
+      deleteLoan(loan.id)
+
+      const auditLogs = getAuditLogs()
+      expect(auditLogs).toHaveLength(3)
+      expect(auditLogs[0]?.eventType).toBe('created')
+      expect(auditLogs[1]?.eventType).toBe('status_update_manual')
+      expect(auditLogs[2]?.eventType).toBe('deleted')
     })
   })
 })
