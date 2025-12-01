@@ -121,35 +121,39 @@ describe('LoanList.vue', () => {
     })
 
     const actionButtons = wrapper.findAll('.action-btn')
-    expect(actionButtons.length).toBe(3)
+    expect(actionButtons.length).toBe(4)
     expect(actionButtons[0].classes()).toContain('success')
     expect(actionButtons[0].attributes('title')).toBe('Approve')
     expect(actionButtons[1].classes()).toContain('danger')
     expect(actionButtons[1].attributes('title')).toBe('Reject')
     expect(actionButtons[2].classes()).toContain('secondary')
     expect(actionButtons[2].attributes('title')).toBe('Auto-decide')
+    expect(actionButtons[3].classes()).toContain('danger')
+    expect(actionButtons[3].attributes('title')).toBe('Delete')
   })
 
-  it('does not show action buttons for approved loans', () => {
+  it('shows only delete button for approved loans', () => {
     wrapper = mount(LoanList, {
       props: {
         loans: [sampleLoans[1]]
       }
     })
 
-    expect(wrapper.findAll('.action-btn').length).toBe(0)
-    expect(wrapper.find('.no-actions').exists()).toBe(true)
+    const actionButtons = wrapper.findAll('.action-btn')
+    expect(actionButtons.length).toBe(1)
+    expect(actionButtons[0].attributes('title')).toBe('Delete')
   })
 
-  it('does not show action buttons for rejected loans', () => {
+  it('shows only delete button for rejected loans', () => {
     wrapper = mount(LoanList, {
       props: {
         loans: [sampleLoans[2]]
       }
     })
 
-    expect(wrapper.findAll('.action-btn').length).toBe(0)
-    expect(wrapper.find('.no-actions').exists()).toBe(true)
+    const actionButtons = wrapper.findAll('.action-btn')
+    expect(actionButtons.length).toBe(1)
+    expect(actionButtons[0].attributes('title')).toBe('Delete')
   })
 
   it('emits approve event when approve button clicked', async () => {
@@ -192,6 +196,47 @@ describe('LoanList.vue', () => {
 
     expect(wrapper.emitted('autoDecide')).toBeTruthy()
     expect(wrapper.emitted('autoDecide')?.[0]).toEqual(['1'])
+  })
+
+  it('emits delete event when delete button clicked and confirmed', async () => {
+    // Mock window.confirm to return true
+    const originalConfirm = window.confirm
+    window.confirm = () => true
+
+    wrapper = mount(LoanList, {
+      props: {
+        loans: [sampleLoans[0]]
+      }
+    })
+
+    const deleteButton = wrapper.findAll('.action-btn')[3]
+    await deleteButton.trigger('click')
+
+    expect(wrapper.emitted('delete')).toBeTruthy()
+    expect(wrapper.emitted('delete')?.[0]).toEqual(['1'])
+
+    // Restore original confirm
+    window.confirm = originalConfirm
+  })
+
+  it('does not emit delete event when delete is cancelled', async () => {
+    // Mock window.confirm to return false
+    const originalConfirm = window.confirm
+    window.confirm = () => false
+
+    wrapper = mount(LoanList, {
+      props: {
+        loans: [sampleLoans[0]]
+      }
+    })
+
+    const deleteButton = wrapper.findAll('.action-btn')[3]
+    await deleteButton.trigger('click')
+
+    expect(wrapper.emitted('delete')).toBeFalsy()
+
+    // Restore original confirm
+    window.confirm = originalConfirm
   })
 
   it('formats currency with dollar sign and commas', () => {
