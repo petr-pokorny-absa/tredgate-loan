@@ -1,5 +1,7 @@
 <script setup lang="ts">
-defineProps<{
+import { ref, watch, nextTick } from 'vue'
+
+const props = defineProps<{
   isOpen: boolean
   title: string
   message: string
@@ -11,14 +13,24 @@ const emit = defineEmits<{
   confirm: []
   cancel: []
 }>()
+
+const modalContent = ref<HTMLElement | null>(null)
+const confirmButton = ref<HTMLButtonElement | null>(null)
+
+watch(() => props.isOpen, async (newVal) => {
+  if (newVal) {
+    await nextTick()
+    confirmButton.value?.focus()
+  }
+})
 </script>
 
 <template>
   <Transition name="modal">
-    <div v-if="isOpen" class="modal-overlay" @click="emit('cancel')">
-      <div class="modal-content" @click.stop>
+    <div v-if="isOpen" class="modal-overlay" @click="emit('cancel')" @keydown.esc="emit('cancel')">
+      <div ref="modalContent" class="modal-content" @click.stop role="dialog" aria-modal="true" :aria-labelledby="'modal-title'">
         <div class="modal-header">
-          <h3>{{ title }}</h3>
+          <h3 id="modal-title">{{ title }}</h3>
         </div>
         <div class="modal-body">
           <p>{{ message }}</p>
@@ -31,6 +43,7 @@ const emit = defineEmits<{
             {{ cancelText || 'Cancel' }}
           </button>
           <button 
+            ref="confirmButton"
             class="danger" 
             @click="emit('confirm')"
           >

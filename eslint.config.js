@@ -16,7 +16,9 @@ export default tseslint.config(
         window: 'readonly',
         document: 'readonly',
         console: 'readonly',
-        localStorage: 'readonly'
+        localStorage: 'readonly',
+        HTMLElement: 'readonly',
+        HTMLButtonElement: 'readonly'
       }
     }
   },
