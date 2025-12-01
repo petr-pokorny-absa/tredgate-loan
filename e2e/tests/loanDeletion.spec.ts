@@ -1,6 +1,5 @@
-import { test, expect } from '../fixtures/fixtures'
+import { test } from '../fixtures/fixtures'
 import { generateValidLoanData } from '../helpers/testData'
-import { texts } from '../helpers/texts'
 
 test.describe('Delete Loan Workflow', () => {
   test('should delete a pending loan', async ({ appPage }) => {

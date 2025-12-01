@@ -1,6 +1,5 @@
-import { test, expect } from '../fixtures/fixtures'
+import { test } from '../fixtures/fixtures'
 import { generateValidLoanData } from '../helpers/testData'
-import { texts } from '../helpers/texts'
 
 test.describe('Loan Application Creation', () => {
   test('should create a new loan application successfully', async ({ appPage }) => {

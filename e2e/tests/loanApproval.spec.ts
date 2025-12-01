@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/fixtures'
+import { test } from '../fixtures/fixtures'
 import { generateValidLoanData, formatCurrency } from '../helpers/testData'
 import { texts } from '../helpers/texts'
 

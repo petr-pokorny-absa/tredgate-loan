@@ -1,4 +1,4 @@
-import { Page, Locator, expect } from '@playwright/test'
+import { Page, Locator } from '@playwright/test'
 
 /**
  * Base Page Object
@@ -26,7 +26,7 @@ export class BasePage {
     await this.page.evaluate(() => {
       try {
         localStorage.clear()
-      } catch (e) {
+      } catch {
         // Ignore if localStorage is not available
       }
     })
