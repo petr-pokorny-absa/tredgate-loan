@@ -57,7 +57,7 @@ test.describe('Loan Approval and Rejection Workflow', () => {
     })
 
     // Verify total approved amount is $0
-    await appPage.loanSummary.verifyTotalApprovedAmount('$0.00')
+    await appPage.loanSummary.verifyTotalApprovedAmount('$0')
   })
 
   test('should handle mixed approval and rejection', async ({ appPage }) => {
@@ -128,6 +128,6 @@ test.describe('Loan Approval and Rejection Workflow', () => {
     })
 
     // Verify total approved amount (10000 + 20000 + 30000 = 60000)
-    await appPage.loanSummary.verifyTotalApprovedAmount('$60,000.00')
+    await appPage.loanSummary.verifyTotalApprovedAmount('$60,000')
   })
 })

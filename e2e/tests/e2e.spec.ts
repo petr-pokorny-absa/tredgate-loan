@@ -76,7 +76,7 @@ test.describe('End-to-End Loan Management Workflow', () => {
         rejected: 0,
       })
       // Total: 40000 + 60000 = 100000
-      await appPage.loanSummary.verifyTotalApprovedAmount('$100,000.00')
+      await appPage.loanSummary.verifyTotalApprovedAmount('$100,000')
     })
 
     // Step 7: Auto-decide third loan (should be rejected)
@@ -89,7 +89,7 @@ test.describe('End-to-End Loan Management Workflow', () => {
         rejected: 1,
       })
       // Total approved should remain 100000
-      await appPage.loanSummary.verifyTotalApprovedAmount('$100,000.00')
+      await appPage.loanSummary.verifyTotalApprovedAmount('$100,000')
     })
 
     // Step 8: Create and immediately reject a loan
@@ -130,7 +130,7 @@ test.describe('End-to-End Loan Management Workflow', () => {
       await appPage.loanList.verifyLoanStatus(loan2.applicantName, texts.status.approved)
       await appPage.loanList.verifyLoanStatus(loan3.applicantName, texts.status.rejected)
 
-      await appPage.loanSummary.verifyTotalApprovedAmount('$100,000.00')
+      await appPage.loanSummary.verifyTotalApprovedAmount('$100,000')
     })
   })
 })

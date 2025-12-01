@@ -17,8 +17,8 @@ export class ConfirmModalPage extends BasePage {
     super(page)
     
     this.modal = page.locator('.modal-overlay')
-    this.modalTitle = this.modal.locator('.modal-title')
-    this.modalMessage = this.modal.locator('.modal-message')
+    this.modalTitle = this.modal.locator('#modal-title')
+    this.modalMessage = this.modal.locator('.modal-body p')
     this.confirmButton = this.modal.locator('button.danger')
     this.cancelButton = this.modal.locator('button.secondary')
   }

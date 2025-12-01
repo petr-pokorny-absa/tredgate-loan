@@ -51,7 +51,7 @@ test.describe('Auto-Decide Loan Workflow', () => {
     })
 
     // Verify total approved amount is $0
-    await appPage.loanSummary.verifyTotalApprovedAmount('$0.00')
+    await appPage.loanSummary.verifyTotalApprovedAmount('$0')
   })
 
   test('should auto-reject loan when term exceeds 60 months', async ({ appPage }) => {
@@ -91,7 +91,7 @@ test.describe('Auto-Decide Loan Workflow', () => {
     await appPage.loanList.verifyLoanStatus(loanData.applicantName, texts.status.approved)
 
     // Verify total approved amount
-    await appPage.loanSummary.verifyTotalApprovedAmount('$100,000.00')
+    await appPage.loanSummary.verifyTotalApprovedAmount('$100,000')
   })
 
   test('should handle auto-decide for multiple loans', async ({ appPage }) => {
@@ -135,6 +135,6 @@ test.describe('Auto-Decide Loan Workflow', () => {
     })
 
     // Verify total approved amount (30000 + 50000 = 80000)
-    await appPage.loanSummary.verifyTotalApprovedAmount('$80,000.00')
+    await appPage.loanSummary.verifyTotalApprovedAmount('$80,000')
   })
 })

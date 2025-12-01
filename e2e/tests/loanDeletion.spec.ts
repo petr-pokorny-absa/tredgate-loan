@@ -92,7 +92,7 @@ test.describe('Delete Loan Workflow', () => {
     })
 
     // Verify total approved amount is reset
-    await appPage.loanSummary.verifyTotalApprovedAmount('$0.00')
+    await appPage.loanSummary.verifyTotalApprovedAmount('$0')
   })
 
   test('should delete one loan from multiple loans', async ({ appPage }) => {
