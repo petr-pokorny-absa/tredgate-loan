@@ -86,22 +86,6 @@ export class LoanFormPage extends BasePage {
    * Create a loan application with provided data
    */
   async createLoanApplication(loanData: LoanTestData) {
-    await this.page.evaluate(() => {
-      return (async () => {
-        const steps = [
-          'Fill applicant name',
-          'Fill loan amount',
-          'Fill term months',
-          'Fill interest rate',
-          'Submit form'
-        ]
-        
-        for (const step of steps) {
-          console.log(`Step: ${step}`)
-        }
-      })()
-    })
-
     await this.fillApplicantName(loanData.applicantName)
     await this.fillAmount(loanData.amount.toString())
     await this.fillTermMonths(loanData.termMonths.toString())
