@@ -5,11 +5,14 @@ import { getLoans, updateLoanStatus, autoDecideLoan, deleteLoan } from './servic
 import LoanForm from './components/LoanForm.vue'
 import LoanList from './components/LoanList.vue'
 import LoanSummary from './components/LoanSummary.vue'
+import AuditLog from './components/AuditLog.vue'
 
 const loans = ref<LoanApplication[]>([])
+const auditLogKey = ref(0)
 
 function refreshLoans() {
   loans.value = getLoans()
+  auditLogKey.value++
 }
 
 function handleApprove(id: string) {
@@ -61,6 +64,10 @@ onMounted(() => {
         />
       </div>
     </main>
+
+    <section class="audit-section">
+      <AuditLog :key="auditLogKey" />
+    </section>
   </div>
 </template>
 
@@ -111,5 +118,9 @@ onMounted(() => {
     flex: none;
     width: 100%;
   }
+}
+
+.audit-section {
+  margin-top: 3rem;
 }
 </style>
