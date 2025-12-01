@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import type { LoanApplication } from '../types/loan'
 import { calculateMonthlyPayment } from '../services/loanService'
+import ConfirmModal from './ConfirmModal.vue'
 
 defineProps<{
   loans: LoanApplication[]
@@ -10,7 +12,29 @@ const emit = defineEmits<{
   approve: [id: string]
   reject: [id: string]
   autoDecide: [id: string]
+  delete: [id: string]
 }>()
+
+const showDeleteModal = ref(false)
+const loanToDelete = ref<LoanApplication | null>(null)
+
+function handleDelete(loan: LoanApplication) {
+  loanToDelete.value = loan
+  showDeleteModal.value = true
+}
+
+function confirmDelete() {
+  if (loanToDelete.value) {
+    emit('delete', loanToDelete.value.id)
+  }
+  showDeleteModal.value = false
+  loanToDelete.value = null
+}
+
+function cancelDelete() {
+  showDeleteModal.value = false
+  loanToDelete.value = null
+}
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -94,12 +118,31 @@ function formatDate(isoDate: string): string {
               >
                 ⚡
               </button>
-              <span v-if="loan.status !== 'pending'" class="no-actions">—</span>
+              <button
+                class="action-btn delete"
+                @click="handleDelete(loan)"
+                title="Delete"
+                aria-label="Delete loan application"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                </svg>
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+
+    <ConfirmModal
+      :is-open="showDeleteModal"
+      title="Delete Loan Application"
+      :message="`Are you sure you want to delete the loan application for ${loanToDelete?.applicantName}?`"
+      confirm-text="Delete"
+      cancel-text="Cancel"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </div>
 </template>
 
@@ -128,6 +171,21 @@ function formatDate(isoDate: string): string {
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
   margin-right: 0.25rem;
+}
+
+.action-btn.delete {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn.delete:hover {
+  background-color: #f8f9fa;
+  color: var(--danger-color);
+  border-color: var(--danger-color);
 }
 
 .action-btn:last-child {
