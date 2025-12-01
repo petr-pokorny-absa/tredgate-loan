@@ -1,0 +1,51 @@
+name: Self-Healing
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  run-healing-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run healing tests
+        id: run-tests
+        continue-on-error: true
+        run: |
+          npm run test -- --reporter=verbose tests/failing_heal.spec.ts 2>&1 | tee test-output.log
+          exit ${PIPESTATUS[0]}
+
+      - name: Save test output
+        if: steps.run-tests.outcome == 'failure'
+        run: |
+          echo "TEST_LOG<<EOF" >> $GITHUB_ENV
+          tail -100 test-output.log >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create Copilot healing issue
+        if: steps.run-tests.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x .github/scripts/create-copilot-issue.sh
+          .github/scripts/create-copilot-issue.sh "${{ env.TEST_LOG }}" "${{ github.run_id }}" "${{ github.sha }}"
