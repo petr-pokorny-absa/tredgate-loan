@@ -128,7 +128,7 @@ describe('LoanList.vue', () => {
     expect(actionButtons[1].attributes('title')).toBe('Reject')
     expect(actionButtons[2].classes()).toContain('secondary')
     expect(actionButtons[2].attributes('title')).toBe('Auto-decide')
-    expect(actionButtons[3].classes()).toContain('danger')
+    expect(actionButtons[3].classes()).toContain('delete')
     expect(actionButtons[3].attributes('title')).toBe('Delete')
   })
 
@@ -199,10 +199,6 @@ describe('LoanList.vue', () => {
   })
 
   it('emits delete event when delete button clicked and confirmed', async () => {
-    // Mock window.confirm to return true
-    const originalConfirm = window.confirm
-    window.confirm = () => true
-
     wrapper = mount(LoanList, {
       props: {
         loans: [sampleLoans[0]]
@@ -211,19 +207,19 @@ describe('LoanList.vue', () => {
 
     const deleteButton = wrapper.findAll('.action-btn')[3]
     await deleteButton.trigger('click')
+
+    // Modal should be open
+    expect(wrapper.find('.modal-overlay').exists()).toBe(true)
+
+    // Click confirm button in modal
+    const confirmButton = wrapper.findAll('.modal-footer button')[1]
+    await confirmButton.trigger('click')
 
     expect(wrapper.emitted('delete')).toBeTruthy()
     expect(wrapper.emitted('delete')?.[0]).toEqual(['1'])
-
-    // Restore original confirm
-    window.confirm = originalConfirm
   })
 
   it('does not emit delete event when delete is cancelled', async () => {
-    // Mock window.confirm to return false
-    const originalConfirm = window.confirm
-    window.confirm = () => false
-
     wrapper = mount(LoanList, {
       props: {
         loans: [sampleLoans[0]]
@@ -233,10 +229,14 @@ describe('LoanList.vue', () => {
     const deleteButton = wrapper.findAll('.action-btn')[3]
     await deleteButton.trigger('click')
 
-    expect(wrapper.emitted('delete')).toBeFalsy()
+    // Modal should be open
+    expect(wrapper.find('.modal-overlay').exists()).toBe(true)
 
-    // Restore original confirm
-    window.confirm = originalConfirm
+    // Click cancel button in modal
+    const cancelButton = wrapper.findAll('.modal-footer button')[0]
+    await cancelButton.trigger('click')
+
+    expect(wrapper.emitted('delete')).toBeFalsy()
   })
 
   it('formats currency with dollar sign and commas', () => {
