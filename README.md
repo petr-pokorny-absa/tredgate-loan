@@ -52,9 +52,17 @@ npm run build
 
 ### Testing
 
+#### Unit Tests (Jest)
 ```bash
 npm run test
 ```
+
+#### E2E Tests (Playwright)
+```bash
+npm run test:e2e
+```
+
+For more information about E2E tests, see [e2e/README.md](e2e/README.md).
 
 ### Linting
 
